@@ -1,0 +1,44 @@
+BMP280 4 conexiones
+
+Pines
+A4-> SDA
+A5-> SCL 
+VCC-> 5V
+GND-> GND
+
+¡¡¡¡Cuidado hay BMP280 con 6 conexiones. Los de 6 conesiones (pines) funcienan a 3,3V en vez que a 5V!!!
+
+Instalar librerias: 
+-I2cdetect
+
+Buscar y cargar el programa ejemplo i2cdetec.h
+Sirve para ver las direcciones i2c que utiliza cada componente, se puede utilizar para otros componentes y ver que dirección tienen. A cada componente a los fabricantes se le asigan una dirección. Esta dirección viene en hexadecimal
+Se tiene que ver en que dirección está nuestro BMP280 Normalmente tiene asigando la 70:76 , es decir la 0x76
+
+- Adafruit BM280 library
+
+Buscar y cargar ejemplo bmdtest
+
+HAy que indicar la dirección de nuestro BMP280, en la línea
+if (!bmp begin(0x76) // Hay que indicar la dirección dentro del paréntesis
+{Serial.print...
+
+
+-------------------------------
+Para sacar los datos en un archivo
+
+//utilizamos variables float
+void loop() {
+	
+float temperatura =bmp.readTemperature();
+float presion =bmp.readPressure();
+float altitud =bmp.readAltitude(1039); // ¡¡¡¡OJO!!!! Hay que ver el forecast diario de la localidad donde estemos. Hay que cambiar el dato 1039 y poner la presión que dan en el parte metereológico del día para que dé la altitud bien.
+
+Serial.print(temperatura);
+Serial.print(",");
+etc etc
+
+
+}
+
+Con el comando printfile podemos enviarlo a una sdCARD
