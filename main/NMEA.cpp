@@ -19,7 +19,7 @@ int NMEA::writeskip(char *out, const char num) {
 
 int NMEA::writef(char *out, const float val, const char prec, const char unit[2]) {
     char buf[10];
-    return NMEA::writes(out, (val !=0)? dtostrf(val, 0, (prec >=0)? prec : 4, buf) : "", unit);
+    return NMEA::writes(out, (val !=0 and val==val)? dtostrf(val, 0, (prec >=0)? prec : 4, buf) : "", unit);
 }
 
 int NMEA::writes(char *out, const char *str, const char unit[2]) {
@@ -27,15 +27,18 @@ int NMEA::writes(char *out, const char *str, const char unit[2]) {
 };
 
 
-char* NMEA::mda(char out[81], const float p, const float T, const float Tw, const float Hr, const float Ha) {
+char* NMEA::mda(char out[81], const float p, const float T, const float Tw, const float Hr) {
+    // p in Pa, T in C, Tw in C, Hr in %
 
     int off = 0;
     off += NMEA::startsen(out, "MDA"); // Sentence type
-    off += NMEA::writef(out+off, p/2.0, 2, "I"); // Pressure (inHg)3386.0
-    off += NMEA::writef(out+off, p/3.0, 2, "B"); // Pressure (Bar)100000.0
+    off += NMEA::writef(out+off, p/3386.0, 2, "I"); // Pressure (inHg)
+    off += NMEA::writef(out+off, p/100000.0, 2, "B"); // Pressure (Bar)
     off += NMEA::writef(out+off, T, 2, "C"); // Air temperature (C)
     off += NMEA::writef(out+off, Tw, 2, "C"); // Water temperature (C)
     off += NMEA::writef(out+off, Hr, 2); // Relative humidity (%)
+    //Absolute humidity can be calculated
+    float Ha = 0;
     off += NMEA::writef(out+off, Ha, 2); // Absolute humidity (%)
     //const float f = ln(RH/100) + 17.625*T/(243.04+T)
     //float Ts = (243.04 * f) / (17.625 - f)
@@ -46,7 +49,7 @@ char* NMEA::mda(char out[81], const float p, const float T, const float Tw, cons
 }
 
 
-char* NMEA::txt(char* out[81], const char* txt) {
+char* NMEA::txt(char out[81], const char* txt) {
     int off = 0;
     off += NMEA::startsen(out, "TXT"); // Sentence type
     off += NMEA::writeskip(out+off, 3); // Empty num_msg, msg_num, and msg_type

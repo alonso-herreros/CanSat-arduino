@@ -5,7 +5,7 @@ class NMEA {
     static const char id[3];
 
 public:
-    static char* mda(char *out, const float p, const float T, const float Tw=0, const float Hr=0, const float Ha=0);
+    static char* mda(char *out, const float p, const float T, const float Tw=0, const float Hr=0);
     
     static char* txt(char *out, const char *txt);
 
