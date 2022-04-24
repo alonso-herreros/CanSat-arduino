@@ -9,7 +9,7 @@ Adafruit_BMP280 bmp; // Use I2C connection
 
 
 #include "NMEA.h"
-char msg[82] = "\0"; // Buffer for NMEA sentences
+char msg[81] = ""; // Buffer for NMEA sentences
 
 
 void setup() {
@@ -19,7 +19,7 @@ void setup() {
 
 
 void loop() {
-    char msg[82] = "\0";
+    char msg[81] = ""; // Buffer for NMEA sentences
     if (!bmp.getStatus() == 243) {
         start_bmp();
     }
@@ -27,7 +27,7 @@ void loop() {
     float pres = bmp.readPressure();
     float alt = bmp.readAltitude(1013.25); // Adjusted to local forecast
 
-    make_mda(msg, pres, temp, 0);
+    NMEA::mda(msg, pres, temp);
     Serial.println(msg);
 
     delay(1000);
@@ -36,8 +36,8 @@ void loop() {
 
 bool start_bmp() {
     // Try to start the BMP280. Print the result (as NMEA text sentence)
-    char msg[82] = "\0";
-    make_txt(msg,
+    char msg[81] = ""; // Buffer for NMEA sentences
+    NMEA::txt(msg,
         (!bmp.begin(0x76)) ?
             "Could not find a valid BMP280 sensor!" :
             "BMP280 started successfully!"
