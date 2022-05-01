@@ -27,7 +27,7 @@ int NMEA::writes(char *out, const char *str, const char unit[2]) {
 };
 
 
-char* NMEA::mda(char out[81], const float p, const float T, const float Tw, const float Hr) {
+char* NMEA::mda(char *out, const float p, const float T, const float Tw, const float Hr) {
     // p in Pa, T in C, Tw in C, Hr in %
 
     int off = 0;
@@ -37,19 +37,12 @@ char* NMEA::mda(char out[81], const float p, const float T, const float Tw, cons
     off += NMEA::writef(out+off, T, 2, "C"); // Air temperature (C)
     off += NMEA::writef(out+off, Tw, 2, "C"); // Water temperature (C)
     off += NMEA::writef(out+off, Hr, 2); // Relative humidity (%)
-    //Absolute humidity can be calculated
-    float Ha = 0;
-    off += NMEA::writef(out+off, Ha, 2); // Absolute humidity (%)
-    //const float f = ln(RH/100) + 17.625*T/(243.04+T)
-    //float Ts = (243.04 * f) / (17.625 - f)
-    float Ts = 0;
-    off += NMEA::writef(out+off, Ts, 2, "C"); // Dew point (C)
-    off += NMEA::writeskip(out+off, 8); // Empty fields: wind dir true, wind dir magn, wind speed kn, wind speed m
+    off += NMEA::writeskip(out+off, 11); // Empty fields
     return out;
 }
 
 
-char* NMEA::txt(char out[81], const char* txt) {
+char* NMEA::txt(char *out, const char* txt) {
     int off = 0;
     off += NMEA::startsen(out, "TXT"); // Sentence type
     off += NMEA::writeskip(out+off, 3); // Empty num_msg, msg_num, and msg_type
