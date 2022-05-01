@@ -1,6 +1,10 @@
 #ifndef NMEA_BUILDER_H
 #define NMEA_BUILDER_H
 
+
+#define NMEA_LEN 81
+
+
 class NMEA {
     static const char id[3];
 
