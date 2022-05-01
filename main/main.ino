@@ -2,6 +2,7 @@
 TODO:
 -Uncomment the code for the dht11 when it's attached to the board
 -Check radio communication
+-Implement radio receiving - try implementing an instruction for resetting the board
 
 Code created by Alonso Herreros Copete for local CanSat project
 */
@@ -29,7 +30,7 @@ Code created by Alonso Herreros Copete for local CanSat project
 RH_RF95 rf95; // Will occupy pins 11, 12 and 13
 Adafruit_BMP280 bmp; // Will use I2C: A5 is SCL (orange), A4 is SDA (yellow)
 DHT dht(DHT_PIN, DHT22); // DHT sensor for humidity
-SoftwareSerial gps_ser(GPS_RX, GPS_TX); // SoftwareSerial with RX at 4 (blue), TX at 3 (green)
+SoftwareSerial gps_ser(GPS_RX, GPS_TX); // SoftwareSerial, check definitions for pins
 
 
 bool rf95_status; // So we don't try communication if it's not working
