@@ -48,26 +48,38 @@ void setup() {
 
     delay(1200); // Wait to get some GPS data in buffer, so .available() may return something
 
-    send(NMEA::txt(msg, (Serial) ? "Serial Started" : "Serial not working!"));
-    send(NMEA::txt(msg, (gps_ser.available()) ? "GPS    Started" : "GPS    not working!"));
+    // [I] for info, [W] for warning. May want to log them to different files later.
+    send(NMEA::txt(msg, (Serial) ? "[I] Serial Started" : "[W] Serial not working!"));
+    send(NMEA::txt(msg, (gps_ser.available()) ? "[I] GPS    Started" : "[W] GPS    not working!"));
     // Add some check that dht is working??
-    send(NMEA::txt(msg, (bmp_status) ? "BMP280 Started" : "BMP280 unable to start!"));
-    send(NMEA::txt(msg, (rf95_status) ? "RF95   Started" : "RF95   unable to start!"));
+    send(NMEA::txt(msg, (bmp_status) ? "[I] BMP280 Started" : "[W] BMP280 unable to start!"));
+    send(NMEA::txt(msg, (rf95_status) ? "[I] RF95   Started" : "[W] RF95   unable to start!"));
 };
 
 
 void loop() {
-    // BMP280 READING AND SENDING
+    // BMP280 READING
     float pres = bmp.readPressure();
     float temp = bmp.readTemperature();
     //float alt = bmp.readAltitude(P_AT_SEA);
 
-    if (pres!=pres || temp!=temp) { // If both values are NaN, then the sensor is not working
+    if (pres!=pres || temp!=temp) { // If both values are NaN, then the BMP280 is not working
         bmp.begin(BMP_ADDR); // Try to restart the BMP280
-        send(NMEA::txt(msg, "BMP280 unable to read! Trying to restart it."));
+        send(NMEA::txt(msg, "[W] BMP280 unable to read! Trying to restart it."));
     }
 
+    /* DHT11 READING
+    float hum = dht.readHumidity();
+
+    if (hum!=hum) { // If the value is NaN, then the DHT11 is not working
+        dht.begin(); // Try to restart the DHT11
+        send(NMEA::txt(msg, "[W] DHT11 unable to read! Trying to restart it."));
+    }
+    */
+
+    // SEND DATA FROM BMP280 AND DHT11
     send(NMEA::mda(msg, pres, temp));
+    //send(NMEA::mda(msg, pres, temp, 0, hum));
     
 
     // GPS READING AND RELAYING
@@ -97,12 +109,12 @@ char* gpsread(char *buf) {
                     buf[i++] = c;
 
                 else {
+                    i = 0;
+                    goto end;
                     // Sometimes we get lines that are bigger than the buffer.
                     // This happens when a new sentence starts being received before the end
                     // of the original line is reached, resulting in a line that is too long.
                     // This data isn't valid, so we'll discard it.
-                    i = 0;
-                    goto end;
                 }
             }
         }
@@ -115,15 +127,18 @@ char* gpsread(char *buf) {
 
 // Send the message over both serial and radio
 char* send(char *msg) {
-    char buf[NMEA_LEN] = ""; // Move the contents to a clean ntca of known length, just in case
-    strncpy(buf, msg, sizeof(buf)); 
+    // Move the contents to a clean ntca of known length, just in case
+    char buf[NMEA_LEN] = ""; 
+    strncpy(buf, msg, sizeof(buf));
 
-    Serial.println(buf); // Print it to serial for logging
+    // Print it to serial for logging
+    Serial.println(buf);
 
-    if (rf95_status) { // If radio is working, send it over radio
+    // If radio is working, send it over radio
+    if (rf95_status) {
         rf95.send((uint8_t *)buf, sizeof(buf));
         rf95.waitPacketSent();
     }
 
-    return buf;
+    return msg;
 }
