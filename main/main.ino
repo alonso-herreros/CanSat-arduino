@@ -1,6 +1,9 @@
 /*
-TODO: Implement DHT11 and GPS readings, packing data, and sending it
-both over serial and radio
+TODO:
+-Uncomment the code for the dht11 when it's attached to the board
+-Check radio communication
+
+Code created by Alonso Herreros Copete for local CanSat project
 */
 
 
