@@ -43,7 +43,7 @@ void (*resetBoard)(void) = 0; // Call this function to reset the board ;)
 
 
 void setup() {
-    Serial.begin(SERIAL_BAUD); // We'll check with (Serial) so see if connection is set up
+    Serial.begin(SERIAL_BAUD); // We'll check with (Serial) to see if connection is set up
     gps_ser.begin(GPS_BAUD); // We'll check with .available() to see if GPS is sending data
     dht.begin(); // Returns void
     bool bmp_status = bmp.begin(BMP_ADDR); // Returns bool, we'll use that
