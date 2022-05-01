@@ -1,8 +1,10 @@
 /*
 TODO:
--Uncomment the code for the dht11 when it's attached to the board
--Check radio communication
--Implement radio receiving - try implementing an instruction for resetting the board
+- Uncomment the code for the dht11 when it's attached to the board
+- Check radio communication
+- Implement radio receiving - try implementing an instruction for resetting the board
+- Implement some kind of handshake?
+- Maybe switch to a lower level communication protocol (i.e. sending data as bytes)
 
 Code created by Alonso Herreros Copete for local CanSat project
 */
