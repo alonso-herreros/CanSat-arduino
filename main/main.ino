@@ -56,7 +56,7 @@ void setup() {
     bmp_status = (bmp.getStatus() == BMP_OK); // This is what we'll use to check BMP status
 
     // (!) for warnings. May want to do something with them later
-    send(NMEA::txt(msg, "Good morning!"));
+    send(NMEA::txt(msg, "Good morning! Delta River's CanSat on-board arduino speaking!"));
     send(NMEA::txt(msg, (Serial) ? "Serial started" : "(!) Serial not working!"));
     send(NMEA::txt(msg, (gps_status) ? "GPS getting data" : "(!) GPS can't get data!"));
     send(NMEA::txt(msg, (bmp_status) ? "BMP280 is OK" : "(!) BMP280 is not OK!"));
@@ -80,7 +80,7 @@ void loop() {
     }
 
 
-    // BMP280 READING
+    /* BMP280 READING - transferred to Raspberry Pi
     if (bmp_status != (bmp.getStatus() == BMP_OK)) { // If status changed, update and notify
         bmp_status = !bmp_status; // This is a bit... eh. Should we just read the status again?
         send(NMEA::txt(msg, (bmp_status) ? "BMP280 is OK" : "(!) BMP280 is not OK!!"));
@@ -91,10 +91,10 @@ void loop() {
         pres = bmp.readPressure(); // Pa
         temp = bmp.readTemperature(); // C
         //alt = bmp.readAltitude(P_AT_SEA); // m
-    }
+    }*/
 
 
-    // DHT11 READING
+    // DHT11 READING - theoretical code (untested)
     if (dht_status != !isnan(dht.readHumidity())) { // If status changed, update and notify
         dht_status = !dht_status; // Again, this is't great. Should we update to the actual check?
         send(NMEA::txt(msg, (dht_status) ? "DHT11 can read" : "(!) DHT11 can't read!!"));
@@ -105,11 +105,11 @@ void loop() {
         hum = dht.readHumidity(); // %
 
 
-    // SEND DATA FROM BMP280 AND DHT11
+    // SEND DATA FROM BMP280 AND DHT11 - this worked before (half-tested)
     send(NMEA::mda(msg, pres, temp, 0, hum));
     
 
-    // GPS READING AND RELAYING
+    // GPS READING AND RELAYING - this code works, and gpsread should too (mostly tested)
     if (gps_status != (gpsread(msg) != NULL)) { // If status changed, update and notify
         gps_status = !gps_status; // This again. Maybe we should update based on an actual check.
         NMEA::txt(msg, (gps_status) ? "GPS getting data" : "(!) GPS can't get data!!")
@@ -127,8 +127,11 @@ void loop() {
 }
 
 
+// Reads an available sentence from the GPS and writes it to buf.
+// Returns NULL pointer if it times out or gets a (very) bad sentence.
+// Will replace talker ID with "DR" for "Delta River"! :D
 // buf is going to store an NMEA sentece so it must be NMEA_LEN long!!!
-char* gpsread(char *buf) {
+char* gpsread(char *buf) { // This should work like 90% sure (half-tested)
     start:
     uint8_t i = -1; // Index for buffer chars. Won't work until $ is found
     for (uint32_t start = millis(); millis() - start < GPS_TIMEOUT;) {
@@ -137,6 +140,7 @@ char* gpsread(char *buf) {
             switch (c) {
             case '\n': // EOL: Terminate reading
                 buf[(i < NMEA_LEN)? i : 0] = '\0'; // Add null terminator
+                buf[1] = 'D'; buf[2] = 'R'; // We're going to replace talker id with DR! :D
                 return buf; // Return the buffer
             case '\r': // Discard the carriage returns
                 continue;
@@ -150,9 +154,9 @@ char* gpsread(char *buf) {
             }
         }
     }
-    //bad: // If we get here, we timed out or got a bad reading
+    bad: // If we get here, we timed out or got something really wrong
     buf[0] = '\0'; // Make the given buffer a 0-length string
-    return NULL; // Return null so we can check how it went
+    return NULL; // Return null - this will be useful later
 }
 
 
@@ -162,7 +166,7 @@ void send(char *data) {
     
     Serial.println(msg); // Print it to serial for logging
 
-    if (rf95_status) { // If radio is working, send it over radio
+    if (rf95_status) { // If radio is working, send it over radio too
         rf95.send((uint8_t *)msg, NMEA_LEN);
         rf95.waitPacketSent();
     }
