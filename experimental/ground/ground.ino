@@ -11,14 +11,6 @@ Dragino Technology Co., Limited
 
 RH_RF95 rf95;
 
-String str_humid;
-String str_temp;
-String str_out; // Define output strings
-
-char gps_lon[20]="\0";           //Storage longtitude
-char gps_lat[20]="\0";           //Storage latitude
-char gps_alt[20]="\0";           //Storage altitude
-
 //void receivepacket();    //Processing receive message and store it in the appropriate array
 
 void setup() {
@@ -42,25 +34,12 @@ void loop(){
 //Receiver LoRa packets and forward it 
 void receivepacket() {
   if (rf95.available()){
-    // received a packet
-    int i =0,j=0,code[4];
-    int m1=0,m2=0,m3=0;   
+    // received a packet 
     uint8_t buf[50];
     char message[50]="\0";
     uint8_t len = sizeof(buf);
     // Check if received packet is correct size
     if (rf95.recv(buf, &len)){
-    // Convert received data into string
-      str_out = String((char*)buf);   
-      // Split string into two values
-      for (int h = 0; h < str_out.length(); h++) {
-        if (str_out.substring(h, h+1) == ",") {
-          str_humid = str_out.substring(0, h);
-          str_temp = str_out.substring(h+1);
-          break;
-        }
-      }
-     
       delay(2000);
       Serial.println();
 
