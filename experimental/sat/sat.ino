@@ -99,7 +99,7 @@ void loop(){
     //strcpy((char *)datasend,gps_lon);//the format of datasend is longtitude,latitude,altitude,DeviceID,
     //Serial.println((char *)datasend);
 
-    
+
     // send data
     //rf95.send(datasend, sizeof(datasend));
 
@@ -122,7 +122,7 @@ void loop(){
         newData = true;
     }
   }
-  smartdelay(1000);
+  gpsdelay(1000);
 }
 
 //If the packet arrive LG01, LG01 will send a ACK and here will receive it and turn on the led.  
@@ -153,12 +153,12 @@ static void send(String msg) {
 }
 
 
-static void smartdelay(unsigned long ms){
+static void gpsdelay(unsigned long ms){
   unsigned long start = millis();
-  do {
-    while (ss.available()){
+  while (millis() - start < ms) {
+    while (ss.available()) {
       ss.print(Serial.read());
       gps.encode(ss.read());
     }
-  } while (millis() - start < ms);
+  }
 }
