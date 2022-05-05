@@ -30,11 +30,11 @@ char gps_alt[20]="\0"; //Storage altitude. unused
 
 DHT dht(DHTPIN, DHTTYPE);
 
-float hum;    // Stores humidity value in percent
-float temp;   // Stores temperature value in Celcius
-String str_humid;
-String str_temp;
-String str_out; // Define output strings
+//String str_humid;
+//String str_temp;
+static float hum;    // Stores humidity value in percent
+static float temp;   // Stores temperature value in Celsius
+static String str_out; // Define output string
 
 void setup(){
   dht.begin();
@@ -54,27 +54,32 @@ void setup(){
 
 void loop(){
   delay(2000);
-  hum = dht.readHumidity(); // Optimizable
-  temp = dht.readTemperature();
-
-  str_humid = String(hum);  // Convert Humidity to string  
-  str_temp = String(temp);  // Convert Temperature to string 
-  str_out = "$[DR]HUM:" + str_humid + ",TEM:" + str_temp + ";\n";  // Combine Humidity and Temperature
-
-  static char *msg = str_out.c_str(); // Compose output character
-  rf95.send((uint8_t *)msg, strlen(msg));
-  rf95.waitPacketSent();
-
-  if (isnan(hum) || isnan(temp)) {
-    Serial.println("$[DR]WRN:Failed to read from DHT sensor!");
-    return; // [Alonso] I don't think we should return... try gps instead
+  hum = dht.readHumidity(); // %
+  temp = dht.readTemperature(); // C
+  //str_humid = String(hum);  // Convert Humidity to string  
+  //str_temp = String(temp);  // Convert Temperature to string
+  
+  if (isnan(hum) || isnan(temp)) { // If we get a NAN value, we have a problem
+    Serial.println("$[DR]WRN:Failed to read from DHT sensor!;");
+    return; // [Alonso] I don't think we should return here, just move on...
   }
-  uint8_t buf[50]; // unused
+  else {
+    str_out = "$[DR]HUM:" + String(hum) + ",TEM:" + String(temp) + ";\n";
+
+    const char *msg = str_out.c_str(); // Convert to cstring (ntca)
+    rf95.send((uint8_t *)msg, strlen(msg)); // Cast to uint8_t and send
+    rf95.waitPacketSent();
+
+    Serial.print(str_out); // Print the original string
+  }
+
+
+  /*uint8_t buf[50]; // unused
   Serial.print("$[DR]HUM:");
   Serial.print(hum);
   Serial.print(",TEM:");
   Serial.print(temp);
-  Serial.println(";"); //very optimizable
+  Serial.println(";"); */
    
   bool newData = false; // written to, but unread
   unsigned long chars; // unused
