@@ -1,8 +1,7 @@
 /*
-In this project,we'll show how to get GPS data from a remote Arduino via Wireless LoRa Protocol
-Hardware Set up
-by Dragino Tech<support@dragino.com>
-Dragino Technology Co., Limited
+Code for the ground unit
+Created by Leopoldo Mosquera and Alonso Herreros.
+Owned by DeltaRiver.
 */
 
 #include <String.h>
