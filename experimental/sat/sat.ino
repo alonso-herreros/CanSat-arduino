@@ -118,8 +118,17 @@ void loop(){
     receivepacket();
   }
 
-  // For 2 seconds we parse GPS data, and check if there's a valid reading
-  newData = gpsdelay(2000); // newData isn't used
+  // For one second we parse GPS data and report some key values
+  for (unsigned long start = millis(); millis() - start < 1000;){
+    while (ss.available()){
+      char c = ss.read();
+      // Serial.write(c); // uncomment this line if you want to see the GPS data flowing
+      if (gps.encode(c)) // Did a new valid sentence come in?
+        newData = true;
+    }
+  }
+  // For 1 more second we parse GPS data, and check if there's a valid reading
+  newData = gpsdelay(1000);
 }
 
 //If the packet arrive LG01, LG01 will send a ACK and here will receive it and turn on the led.  
@@ -160,7 +169,6 @@ bool gpsdelay(unsigned long ms){
       if ( gps.encode(ss.read()) ) // If there is a valid reading, report it
         newData = true;
     }
-    delay(10);
   }
 
   return newData;
