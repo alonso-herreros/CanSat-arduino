@@ -110,7 +110,7 @@ void loop(){
     str_out = "$[DR]LAT:" + String(flat) + ",LON:" + String(flon) + ",ALT:" + String(falt) + ";\n";
     static char *msg2 = str_out.c_str(); // Compose output cstring
 
-    Serial.print((char *)str_out.c_str());
+    Serial.print(str_out);
     rf95.send((uint8_t *)msg2, strlen(msg2));
     rf95.waitPacketSent();
     
