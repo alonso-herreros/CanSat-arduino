@@ -64,7 +64,7 @@ void loop(){
     return; // [Alonso] I don't think we should return here, just move on...
   }
   else {
-    str_out = "$[DR]HUM:" + String(hum) + ",TEM:" + String(temp) + ";\n";
+    str_out = "$[DR]HUM:" + String(hum, 4) + ",TEM:" + String(temp, 4) + ";\n";
 
     const char *msg = str_out.c_str(); // Convert to cstring (ntca)
     rf95.send((uint8_t *)msg, strlen(msg)); // Cast to uint8_t and send
@@ -107,8 +107,8 @@ void loop(){
     // send data
     //rf95.send(datasend, sizeof(datasend));
 
-    str_out = "$[DR]LAT:" + String(flat) + ",LON:" + String(flon) + ",ALT:" + String(falt) + ";\n";
-    static char *msg2 = str_out.c_str(); // Compose output cstring
+    str_out = "$[DR]LAT:" + String(flat, 6) + ",LON:" + String(flon, 6) + ",ALT:" + String(falt, 6) + ";\n";
+    const char *msg2 = str_out.c_str(); // Compose output cstring
 
     Serial.print(str_out);
     rf95.send((uint8_t *)msg2, strlen(msg2));
