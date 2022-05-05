@@ -115,7 +115,7 @@ void loop(){
   }
 
   // For 2 seconds we parse GPS data, and check if there's a valid reading
-  newData = gpsdelay(2000);
+  newData = gpsdelay(2000); // The "newData" variable still isn't used though
 }
 
 //If the packet arrive LG01, LG01 will send a ACK and here will receive it and turn on the led.  
@@ -149,10 +149,11 @@ static void send(String msg) {
 bool gpsdelay(unsigned long ms){
   bool newData = false;
 
+  // Save the current time and repeat this until "ms" milliseconds have passed
   for (unsigned long start = millis(); millis() - start < ms;) {
     while (ss.available()) {
-      ss.print(Serial.read());
-      if ( gps.encode(ss.read()) )
+      ss.print(Serial.read()); // [Alonso] I dont think this does anything...
+      if ( gps.encode(ss.read()) ) // If there is a valid reading, report it
         newData = true;
     }
     delay(10);
