@@ -17,24 +17,24 @@ Dragino Technology Co., Limited
 
 TinyGPS gps;
 RH_RF95 rf95;
-SoftwareSerial ss(4, 3); // Arduino RX, TX to conenct to GPS module.
-static void smartdelay(unsigned long ms);
+SoftwareSerial ss(4, 3); // Use those ports as RX & TX to conenct to GPS module
+static void smartdelay(unsigned long ms); // We don't need this here, but it's not bad
 
-String datastring1="";
-String datastring2="";
-String datastring3="";
-uint8_t datasend[50];    //Storage  longtitude,latitude and altitude
+String datastring1=""; // written to, but not used
+String datastring2=""; // written to, but not used
+String datastring3=""; // written to, but not used
+uint8_t datasend[50];  // Storage  longtitude,latitude and altitude. written to, but not used
 
-char gps_lon[50]="\0";  //Storage GPS info
-char gps_lat[20]="\0"; //Storage latitude
-char gps_alt[20]="\0"; //Storage altitude
+char gps_lon[50]="\0"; //Storage GPS info. unused
+char gps_lat[20]="\0"; //Storage latitude. unused
+char gps_alt[20]="\0"; //Storage altitude. unused
 
 DHT dht(DHTPIN, DHTTYPE);
 
 float hum;    // Stores humidity value in percent
 float temp;   // Stores temperature value in Celcius
-String str_humid;
-String str_temp;
+String str_humid; // unused
+String str_temp; // unused
 String str_out; // Define output strings
 
 void setup(){
@@ -55,7 +55,7 @@ void setup(){
 
 void loop(){
   delay(2000);
-  hum = dht.readHumidity();
+  hum = dht.readHumidity(); // Optimizable
   temp = dht.readTemperature();
 
   str_humid = String(hum);  // Convert Humidity to string  
@@ -68,35 +68,35 @@ void loop(){
 
   if (isnan(hum) || isnan(temp)) {
     Serial.println("$[DR]WRN:Failed to read from DHT sensor!");
-    return;
+    return; // [Alonso] I don't think we should return... try gps instead
   }
-  uint8_t buf[50];
+  uint8_t buf[50]; // unused
   Serial.print("$[DR]HUM:");
   Serial.print(hum);
   Serial.print(",TEM:");
   Serial.print(temp);
-  Serial.println(";");
+  Serial.println(";"); //very optimizable
    
-  bool newData = false;
-  unsigned long chars;
-  unsigned short sentences, failed;
+  bool newData = false; // written to, but unread
+  unsigned long chars; // unused
+  unsigned short sentences, failed; // unused
   
-  float flat, flon,falt;
-  unsigned long age;
+  float flat, flon, falt;
+  unsigned long age; // written to, but not used
   gps.f_get_position(&flat, &flon, &age);
   falt=gps.f_altitude();  //get altitude
   flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6;//save six decimal places
   flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 6;
   falt == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : falt, 2;//save two decimal places
-  datastring1 += dtostrf(flat, 0, 6, gps_lat);
-  datastring2 += dtostrf(flon, 0, 6, gps_lon);
-  datastring3 += dtostrf(falt, 0, 2, gps_alt);
-  if(flon!=1000.000000){
+  datastring1 += dtostrf(flat, 0, 6, gps_lat); // unused
+  datastring2 += dtostrf(flon, 0, 6, gps_lon); // unused
+  datastring3 += dtostrf(falt, 0, 2, gps_alt); // unused
+  if(flon!=1000.000000){ // Maybe we don't need this check, but just in case we'll keep it
     //strcat(gps_lon,",");
     //strcat(gps_lon,gps_lat); 
     //strcat(gps_lon,","); 
     //strcat(gps_lon,gps_alt);
-    //strcpy((char *)datasend,gps_lon);//the format of datasend is longtitude,latitude,altitude,DeviceID,
+    //strcpy((char *)datasend,gps_lon);//the format of datasend is longtitude,latitude,altitude
     //Serial.println((char *)datasend);
 
 
@@ -106,7 +106,7 @@ void loop(){
     str_out = "$[DR]LAT:" + String(flat) + ",LON:" + String(flon) + ",ALT:" + String(falt) + ";\n";
     static char *msg2 = str_out.c_str(); // Compose output cstring
 
-    Serial.println((char *)str_out.c_str());
+    Serial.print((char *)str_out.c_str());
     rf95.send((uint8_t *)msg2, strlen(msg2));
     rf95.waitPacketSent();
     
@@ -115,7 +115,7 @@ void loop(){
   }
 
   // For 2 seconds we parse GPS data, and check if there's a valid reading
-  newData = gpsdelay(2000); // The "newData" variable still isn't used though
+  newData = gpsdelay(2000); // newData isn't used
 }
 
 //If the packet arrive LG01, LG01 will send a ACK and here will receive it and turn on the led.  
@@ -138,12 +138,12 @@ void receivepacket(){
 }
 
 
-static void send(String msg) {
+/*static void send(String msg) {
   char *s = msg.c_str();
   rf95.send((uint8_t *)s, strlen(s));
   rf95.waitPacketSent();
   Serial.println(msg);
-}
+}*/
 
 
 bool gpsdelay(unsigned long ms){
