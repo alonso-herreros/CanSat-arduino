@@ -1,8 +1,7 @@
 /*
-In this project,we'll show how to get GPS data from a remote Arduino via Wireless LoRa Protocol 
-Hardware Set up
-by Dragino Tech<support@dragino.com>
-Dragino Technology Co., Limited
+Code for the flight unit
+Created by Leopoldo Mosquera and Alonso Herreros.
+Owned by DeltaRiver.
 */
 
 
@@ -33,8 +32,8 @@ DHT dht(DHTPIN, DHTTYPE);
 
 float hum;    // Stores humidity value in percent
 float temp;   // Stores temperature value in Celcius
-String str_humid; // unused
-String str_temp; // unused
+String str_humid;
+String str_temp;
 String str_out; // Define output strings
 
 void setup(){
