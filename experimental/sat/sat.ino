@@ -35,7 +35,7 @@ float hum;    // Stores humidity value in percent
 float temp;   // Stores temperature value in Celcius
 String str_humid;
 String str_temp;
-String str_out; // Define output strings 
+String str_out; // Define output strings
 
 void setup(){
   dht.begin();
@@ -61,7 +61,7 @@ void loop(){
   str_humid = String(hum);  // Convert Humidity to string  
   str_temp = String(temp);  // Convert Temperature to string 
   str_out = "$[DR]HUM:" + str_humid + ",TEM:" + str_temp + ";\n";  // Combine Humidity and Temperature
-          
+
   static char *msg = str_out.c_str(); // Compose output character
   rf95.send((uint8_t *)msg, strlen(msg));
   rf95.waitPacketSent();
@@ -84,24 +84,30 @@ void loop(){
   float flat, flon,falt;
   unsigned long age;
   gps.f_get_position(&flat, &flon, &age);
-  falt=gps.f_altitude();  //get altitude       
-  flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6;//save six decimal places 
+  falt=gps.f_altitude();  //get altitude
+  flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6;//save six decimal places
   flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 6;
   falt == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : falt, 2;//save two decimal places
-  datastring1 += dtostrf(flat, 0, 6, gps_lat); 
+  datastring1 += dtostrf(flat, 0, 6, gps_lat);
   datastring2 += dtostrf(flon, 0, 6, gps_lon);
   datastring3 += dtostrf(falt, 0, 2, gps_alt);
   if(flon!=1000.000000){
-    str_out = "$[DR]LON:";
-    strcat(gps_lon,",");
-    strcat(gps_lon,gps_lat); 
-    strcat(gps_lon,","); 
-    strcat(gps_lon,gps_alt);
-    strcpy((char *)datasend,gps_lon);//the format of datasend is longtitude,latitude,altitude,DeviceID,
-    Serial.println((char *)datasend);
+    //strcat(gps_lon,",");
+    //strcat(gps_lon,gps_lat); 
+    //strcat(gps_lon,","); 
+    //strcat(gps_lon,gps_alt);
+    //strcpy((char *)datasend,gps_lon);//the format of datasend is longtitude,latitude,altitude,DeviceID,
+    //Serial.println((char *)datasend);
+
     
     // send data
-    rf95.send(datasend, sizeof(datasend));  
+    //rf95.send(datasend, sizeof(datasend));
+
+    str_out = "$[DR]LAT:" + String(flat) + ",LON:" + String(flon) + ",ALT:" + String(falt) + ";\n";
+    static char *msg2 = str_out.c_str(); // Compose output cstring
+
+    Serial.println((char *)str_out.c_str());
+    rf95.send((uint8_t *)msg2, strlen(msg2));
     rf95.waitPacketSent();
     
     // Now wait for a reply
