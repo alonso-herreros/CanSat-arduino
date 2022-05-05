@@ -11,6 +11,9 @@ Dragino Technology Co., Limited
 
 RH_RF95 rf95;
 
+static uint8_t buf[50];
+static uint8_t len = sizeof(buf);
+
 //void receivepacket();    //Processing receive message and store it in the appropriate array
 
 void setup() {
@@ -35,15 +38,13 @@ void loop(){
 void receivepacket() {
   if (rf95.available()){
     // received a packet 
-    uint8_t buf[50];
-    char message[50]="\0";
-    uint8_t len = sizeof(buf);
-    // Check if received packet is correct size
-    if (rf95.recv(buf, &len)){
-      delay(2000);
-      Serial.println();
+    for (int i=0; i<50; i++) 
+      buf[i] = 0;
+    //char message[50]="\0"; //unused
+    if (rf95.recv(buf, &len)){ // Check if received packet is correct size
+      delay(100); // ESTO estaba a 2000, lo he reducido, si no va súbelo a 500...
 
-      Serial.print((char*)buf);
+      Serial.println((char*)buf);
       uint8_t data[] = "Gateway receive GPS data";
       rf95.send(data, sizeof(data));
       rf95.waitPacketSent();
