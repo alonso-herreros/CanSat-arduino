@@ -8,13 +8,6 @@ Dragino Technology Co., Limited
 #include <String.h>
 #include <SPI.h>
 #include <RH_RF95.h>
-#ifdef LG01_GATEWAY
-#include <Console.h>
-#include <Process.h>
-#define SerialPrint Console
-#else
-#define SerialPrint Serial
-#endif
 
 RH_RF95 rf95;
 
@@ -28,15 +21,10 @@ char gps_alt[20]="\0";           //Storage altitude
 
 //void receivepacket();    //Processing receive message and store it in the appropriate array
 
-void setup() { 
-  #ifdef LG01_GATEWAY
-    Bridge.begin(9600);
-    SerialPrint.begin();
-  #else
-    SerialPrint.begin(9600);
-  #endif 
+void setup() {
+  Serial.begin(9600);
   
-   if (!rf95.init()) {// Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
+  if (!rf95.init()) {// Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
     Serial.println("Starting LoRa failed!");
     while (1);
   }
@@ -46,6 +34,7 @@ void setup() {
   
   Serial.println("Ready to receive!");
 }
+
 void loop(){
  receivepacket();
 }
