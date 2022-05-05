@@ -11,7 +11,7 @@ Dragino Technology Co., Limited
 
 RH_RF95 rf95;
 
-static uint8_t buf[50];
+static uint8_t buf[64];
 static uint8_t len = sizeof(buf);
 
 //void receivepacket();    //Processing receive message and store it in the appropriate array
@@ -38,7 +38,7 @@ void loop(){
 void receivepacket() {
   if (rf95.available()){
     // received a packet 
-    for (int i=0; i<50; i++) 
+    for (int i=0; i<64; i++) 
       buf[i] = 0;
     //char message[50]="\0"; //unused
     if (rf95.recv(buf, &len)){ // Check if received packet is correct size
