@@ -19,14 +19,14 @@ RH_RF95 rf95;
 SoftwareSerial ss(4, 3); // Use those ports as RX & TX to conenct to GPS module
 static void smartdelay(unsigned long ms); // We don't need this here, but it's not bad
 
-String datastring1=""; // written to, but not used
-String datastring2=""; // written to, but not used
-String datastring3=""; // written to, but not used
-uint8_t datasend[50];  // Storage  longtitude,latitude and altitude. written to, but not used
+//String datastring1=""; // written to, but not used
+//Sring datastring2=""; // written to, but not used
+//String datastring3=""; // written to, but not used
+//uint8_t datasend[50];  // Storage  longtitude,latitude and altitude. written to, but not used
 
-char gps_lon[50]="\0"; //Storage GPS info. unused
-char gps_lat[20]="\0"; //Storage latitude. unused
-char gps_alt[20]="\0"; //Storage altitude. unused
+//char gps_lon[50]="\0"; //Storage GPS info. unused
+//char gps_lat[20]="\0"; //Storage latitude. unused
+//char gps_alt[20]="\0"; //Storage altitude. unused
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -34,7 +34,13 @@ DHT dht(DHTPIN, DHTTYPE);
 //String str_temp;
 static float hum;    // Stores humidity value in percent
 static float temp;   // Stores temperature value in Celsius
+static float flat, flon, falt;
+static unsigned long age; // written to, but not used
 static String str_out; // Define output string
+
+unsigned int loopstart = millis();
+
+void (*restart)(void) = 0; // Call this function to reset the board ;)
 
 void setup(){
   dht.begin();
@@ -44,7 +50,8 @@ void setup(){
   while (!Serial);
     if (!rf95.init()) {  // Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
     Serial.println("$[DR]TXW:Starting LoRa failed!;");
-    while (1);
+    delay (1000);
+    restart();
   } 
   /* Set frequency is 868MHz,SF is 7,SB is 125KHz,CR is 4/5 and Tx power is 20dBm */
   rf95.setFrequency(868);
@@ -53,7 +60,9 @@ void setup(){
 }
 
 void loop(){
-  delay(2000);
+  if (millis() - loopstart > 25000)
+    restart();
+
   hum = dht.readHumidity(); // %
   temp = dht.readTemperature(); // C
   //str_humid = String(hum);  // Convert Humidity to string  
@@ -61,7 +70,7 @@ void loop(){
   
   if (isnan(hum) || isnan(temp)) { // If we get a NAN value, we have a problem
     Serial.println("$[DR]WRN:Failed to read from DHT sensor!;");
-    return; // [Alonso] I don't think we should return here, just move on...
+    //return; // [Alonso] I don't think we should return here, just move on...
   }
   else {
     str_out = "$[DR]HUM:" + String(hum, 2) + ",TEM:" + String(temp, 2) + ";\n";
@@ -81,20 +90,18 @@ void loop(){
   Serial.print(temp);
   Serial.println(";"); */
    
-  bool newData = false; // written to, but unread
+  /*bool newData = false; // written to, but unread
   unsigned long chars; // unused
-  unsigned short sentences, failed; // unused
+  unsigned short sentences, failed; // unused */
   
-  float flat, flon, falt;
-  unsigned long age; // written to, but not used
   gps.f_get_position(&flat, &flon, &age);
   falt=gps.f_altitude();  //get altitude
-  flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6;//save six decimal places
+  /*flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6;//save six decimal places
   flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 6;
   falt == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : falt, 2;//save two decimal places
   datastring1 += dtostrf(flat, 0, 6, gps_lat); // unused
   datastring2 += dtostrf(flon, 0, 6, gps_lon); // unused
-  datastring3 += dtostrf(falt, 0, 2, gps_alt); // unused
+  datastring3 += dtostrf(falt, 0, 2, gps_alt); // unused*/
   if(flon!=1000.000000){ // Maybe we don't need this check, but just in case we'll keep it
     //strcat(gps_lon,",");
     //strcat(gps_lon,gps_lat); 
@@ -115,23 +122,23 @@ void loop(){
     rf95.waitPacketSent();
     
     // Now wait for a reply
-    receivepacket();
+    //receivepacket();
+
   }
 
   // For one second we parse GPS data and report some key values
-  for (unsigned long start = millis(); millis() - start < 1000;){
+  for (unsigned long start = millis(); millis() - start < 2000;){
     while (ss.available()){
-      char c = ss.read();
+      //char c = ss.read();
       // Serial.write(c); // uncomment this line if you want to see the GPS data flowing
-      if (gps.encode(c)) // Did a new valid sentence come in?
-        newData = true;
+      gps.encode(ss.read()); // Did a new valid sentence come in?
     }
   }
   // For 1 more second we parse GPS data, and check if there's a valid reading
-  newData = gpsdelay(1000);
+  //newData = gpsdelay(1000);
 }
 
-//If the packet arrive LG01, LG01 will send a ACK and here will receive it and turn on the led.  
+/*If the packet arrive LG01, LG01 will send a ACK and here will receive it and turn on the led.  
 void receivepacket(){
   uint8_t indatabuf[50];
   uint8_t len = sizeof(indatabuf);
@@ -148,28 +155,5 @@ void receivepacket(){
   else{
     Serial.println("No reply. Is ground module running or overranging the receive distance?");
   }
-}
-
-
-/*static void send(String msg) {
-  char *s = msg.c_str();
-  rf95.send((uint8_t *)s, strlen(s));
-  rf95.waitPacketSent();
-  Serial.println(msg);
 }*/
 
-
-bool gpsdelay(unsigned long ms){
-  bool newData = false;
-
-  // Save the current time and repeat this until "ms" milliseconds have passed
-  for (unsigned long start = millis(); millis() - start < ms;) {
-    while (ss.available()) {
-      ss.print(Serial.read()); // [Alonso] I dont think this does anything...
-      if ( gps.encode(ss.read()) ) // If there is a valid reading, report it
-        newData = true;
-    }
-  }
-
-  return newData;
-}
