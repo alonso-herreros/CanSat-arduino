@@ -10,8 +10,6 @@ Owned by DeltaRiver.
 
 RH_RF95 rf95;
 
-static uint8_t buf[64];
-static uint8_t len = sizeof(buf);
 
 //void receivepacket();    //Processing receive message and store it in the appropriate array
 
@@ -35,13 +33,15 @@ void loop(){
 
 //Receiver LoRa packets and forward it 
 void receivepacket() {
+  uint8_t buf[64] = "";
+  uint8_t len = sizeof(buf);
   if (rf95.available()){
     // received a packet 
     for (int i=0; i<64; i++) 
-      buf[i] = 0;
+      buf[i] = '\0';
     //char message[50]="\0"; //unused
     if (rf95.recv(buf, &len)){ // Check if received packet is correct size
-      delay(100); // ESTO estaba a 2000, lo he reducido, si no va súbelo a 500...
+      delay(500); // ESTO estaba a 2000, lo he reducido, si no va súbelo a 500...
 
       Serial.println((char*)buf);
       uint8_t data[] = "Gateway receive GPS data";
