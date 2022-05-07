@@ -24,7 +24,7 @@ void setup() {
   rf95.setFrequency(868);
   rf95.setTxPower(13);
   
-  Serial.println("Ready to receive!");
+  Serial.println("$[DR]TXT:Ground is seady to receive!;");
 }
 
 void loop(){
